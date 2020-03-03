@@ -1,0 +1,50 @@
+name: cds-assessment.com
+recipe: laravel
+config:
+  php: "7.2"
+  via: nginx
+  webroot: public
+  cache: redis
+  xdebug: true
+proxy:
+  pma:
+    - pma-cds-assessment.com.lndo.site
+  appserver_nginx:
+    - cds-assessment.com.lndo.site
+
+services:
+# Suggest using a secondary DB for Testing
+  database:
+    type: mysql
+  pma:
+    type: phpmyadmin
+    hosts:
+      - database
+  redis:
+    type: redis
+  node:
+    type: node
+
+#  Varnish is a caching software. When the application is mostly built, it would be good to enable this.
+#  varnish:
+#    type: varnish
+#    backends:
+#      - appserver
+
+tooling:
+  npm:
+    service: node
+  echo:
+    service: node
+    cmd: laravel-echo-server
+  phpunit:
+    service: appserver
+    description: "Run PHP Unit tests: lando phpunit"
+    cmd: /app/vendor/bin/phpunit
+events:
+  post-start:
+    - appserver: cd $LANDO_MOUNT && composer install
+    #    - appserver: cd $LANDO_MOUNT && php script.php
+    - appserver: cd $LANDO_MOUNT && php artisan migrate
+
+
