@@ -3,6 +3,7 @@
     namespace App\Http\Controllers;
 
     use App\Company;
+    use App\Log;
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\Auth;
     use Illuminate\Validation\Rule;
@@ -14,15 +15,15 @@
         {
             return $this->validate( $request, [
                 'CompanyName'         => [ 'required', 'min:2', 'max:255' ],
-                'Ticker'              => [],
-                'NickName'            => [],
-                'Address_1'           => [],
-                'Address_2'           => [],
-                'City'                => [],
-                'State'               => [],
-                'PostalCode'          => [],
-                'HomeCountry'         => [],
-                'MainCountryOfOrigin' => [],
+                'Ticker'              => [ 'sometimes', 'nullable', 'string', 'max:50' ],
+                'NickName'            => [ 'sometimes', 'nullable', 'string', 'max:255' ],
+                'Address_1'           => [ 'sometimes', 'nullable', 'string', 'max:255' ],
+                'Address_2'           => [ 'sometimes', 'nullable', 'string', 'max:255' ],
+                'City'                => [ 'sometimes', 'nullable', 'alpha', 'max:50' ],
+                'State'               => [ 'sometimes', 'nullable', 'alpha', 'max:5' ],
+                'PostalCode'          => [ 'sometimes', 'nullable', 'string', 'max:10' ],
+                'HomeCountry'         => [ 'sometimes', 'nullable', 'string', 'max:255' ],
+                'MainCountryOfOrigin' => [ 'sometimes', 'nullable', 'string', 'max:255' ],
                 'Active'              => [],
                 'Deleted'             => [],
                 'Archived'            => [],
@@ -37,14 +38,14 @@
          */
         public function index()
         {
-            $user      = Auth::user();
-            $companies = [];
+            $user = Auth::user();
+
             if ( ! $user ) {
                 return view( 'company.index', compact( 'companies' ) );
             }
-            $companies = $user->company()->withCount( [ 'contacts' ] )->get();
+            $company = $user->company()->with( [ 'contacts' ] )->first();
 
-            return view( 'company.index', compact( 'companies' ) );
+            return view( 'company.index', compact( 'company' ) );
         }
 
         /**
@@ -68,8 +69,13 @@
         {
             $user      = Auth::user();
             $validated = $this->validator( $request );
-            $user->company()->create( $validated );
-            $company = $user->company;
+
+            $company = $user->company()->create( $validated );
+
+            $user->logs()->create( [
+                                       'Action'  => 'CREATE',
+                                       'Subject' => 'COMPANY ' . $company->CompanyName,
+                                   ] );
 
             return view( 'company.index', compact( 'company' ) );
         }
@@ -122,7 +128,12 @@
             }
             $company->update( $validated );
 
-            return redirect( '/companies' );
+            Auth()->user()->logs()->create( [
+                                                'Action'  => 'UPDATE',
+                                                'Subject' => 'COMPANY ' . $company->CompanyName,
+                                            ] );
+
+            return redirect( '/company' );
         }
 
         /**
@@ -137,6 +148,10 @@
         {
             $company->Deleted = 1;
             $company->save();
+            Auth()->user()->logs()->create( [
+                                                'Action'  => 'DELETE',
+                                                'Subject' => 'COMPANY ' . $company->CompanyName,
+                                            ] );
 
             return redirect( '/companies' );
         }

@@ -11,10 +11,13 @@
     |
     */
 
+    use App\Log;
+
     Route::get( '/', function () {
-        return view( 'welcome' );
+
+        return view( 'welcome', compact( 'logs' ) );
     } );
-    Route::get( '/companies', 'CompanyController@index' );
+    Route::get( '/company', 'CompanyController@index' );
 
 
     Auth::routes();
@@ -23,9 +26,21 @@
 
 
     Route::middleware( [ 'auth' ] )->group( function () {
-        Route::resource( '/company', 'CompanyController' )->only(['store', 'create', 'update', 'edit', 'destroy', 'show']);
+        Route::resource( '/company', 'CompanyController' )->only( [
+                                                                      'store',
+                                                                      'create',
+                                                                      'update',
+                                                                      'edit',
+                                                                      'destroy',
+                                                                      'show',
+                                                                  ] );
 
         Route::resource( '/contacts', 'ContactController' );
+        Route::get( '/logs', function () {
+
+            $logs = Log::with( [ 'user' ] )->get();
+            return view( 'logs', compact( 'logs' ) );
+        } );
     } );
 
 

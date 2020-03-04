@@ -8,6 +8,9 @@
     {
         protected $table      = 'tbldat_BusinessContacts';
         protected $primaryKey = 'PRI';
+        protected $guarded    = [ 'PRI' ];
+        Const UPDATED_AT = null;
+        Const CREATED_AT = null;
 
         public function company()
         {

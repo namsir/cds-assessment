@@ -15,7 +15,7 @@
 
         public function owner()
         {
-            return $this->belongsTo( User::class );
+            return $this->belongsTo( User::class, 'User_Key' );
         }
 
         public function contacts()
