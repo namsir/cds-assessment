@@ -13,9 +13,20 @@ class CreateUsersTable extends Migration
      */
     public function up()
     {
+        Schema::create('tbldat_Users', function (Blueprint $table) {
+            $table->bigIncrements('PRI');
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->rememberToken();
+            $table->timestamps();
+
+        });
 
         Schema::create('tbldat_Companies', function (Blueprint $table) {
             $table->bigIncrements('PRI');
+            $table->unsignedBigInteger('User_Key')->index();
             $table->string('CompanyName', 255);
             $table->string('Ticker', 50)->nullable();
             $table->string('NickName', 255)->nullable();
@@ -29,6 +40,7 @@ class CreateUsersTable extends Migration
             $table->tinyInteger('Active')->nullable();
             $table->tinyInteger('Deleted')->nullable();
             $table->tinyInteger('Archived')->nullable();
+            $table->foreign('User_Key')->references('PRI')->on('tbldat_Users')->onDelete('CASCADE');
         });
 
 
@@ -64,24 +76,6 @@ class CreateUsersTable extends Migration
 
         });
 
-
-        Schema::create('tbldat_Users', function (Blueprint $table) {
-            $table->bigIncrements('PRI');
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
-            $table->timestamps();
-
-        });
-
-        Schema::create('tbldat_UserCompanies', function (Blueprint $table) {
-            $table->unsignedBigInteger('user_PRI')->index();
-            $table->foreign('user_PRI')->references('PRI')->on('tbldat_Users')->onDelete('cascade');
-            $table->unsignedBigInteger('company_PRI')->index();
-            $table->foreign('company_PRI')->references('PRI')->on('tbldat_Companies')->onDelete('cascade');
-        });
 
     }
 

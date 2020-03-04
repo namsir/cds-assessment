@@ -42,7 +42,7 @@
             if ( ! $user ) {
                 return view( 'company.index', compact( 'companies' ) );
             }
-            $companies = $user->companies()->withCount( [ 'contacts' ] )->get();
+            $companies = $user->company()->withCount( [ 'contacts' ] )->get();
 
             return view( 'company.index', compact( 'companies' ) );
         }
@@ -68,10 +68,10 @@
         {
             $user      = Auth::user();
             $validated = $this->validator( $request );
-            $user->companies()->create( $validated );
-            $companies = $user->companies;
+            $user->company()->create( $validated );
+            $company = $user->company;
 
-            return view( 'company.index', compact( 'companies' ) );
+            return view( 'company.index', compact( 'company' ) );
         }
 
         /**

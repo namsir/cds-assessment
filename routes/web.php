@@ -23,7 +23,7 @@
 
 
     Route::middleware( [ 'auth' ] )->group( function () {
-        Route::resource( '/companies', 'CompanyController' )->only(['store', 'create', 'update', 'edit', 'destroy', 'show']);
+        Route::resource( '/company', 'CompanyController' )->only(['store', 'create', 'update', 'edit', 'destroy', 'show']);
 
         Route::resource( '/contacts', 'ContactController' );
     } );

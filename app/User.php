@@ -45,7 +45,7 @@
 
 
 
-        public function companies(){
-            return $this->belongsToMany(Company::class, 'tbldat_UserCompanies');
+        public function company(){
+            return $this->hasOne(Company::class);
         }
     }

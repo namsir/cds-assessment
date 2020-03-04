@@ -4,67 +4,101 @@
     <?php
     // dd($companies);
     ?>
-    <div class="container-fluid">
+    <div class="container">
         <div class="row justify-content-center">
-            <div class="col-md-12">
-                @if(count($companies) > 0)
-                    <table class="table table-striped">
-                        <thead>
-                        <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Company Name</th>
-                            <th scope="col">Ticker</th>
-                            <th scope="col">NickName</th>
-                            <th scope="col">Address</th>
-                            <th scope="col">Address 2</th>
-                            <th scope="col">City</th>
-                            <th scope="col">State</th>
-                            <th scope="col">Postal Code</th>
-                            <th scope="col">Home Country</th>
-                            <th scope="col">Main Country Of Origin</th>
-                            <th scope="col"># of Contacts</th>
-                            <th scope="col">Active</th>
-                            <th scope="col">Deleted</th>
-                            <th scope="col">Archived</th>
-                            <th scope="col">Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @foreach($companies as $company)
-                            <tr>
-                                <th scope="row">{{ $company->PRI }}</th>
-                                <td>{{ $company->CompanyName }}</td>
-                                <td>{{ $company->Ticker }}</td>
-                                <td>{{ $company->NickName }}</td>
-                                <td>{{ $company->Address_1 }}</td>
-                                <td>{{ $company->Address_2 }}</td>
-                                <td>{{ $company->City }}</td>
-                                <td>{{ $company->State }}</td>
-                                <td>{{ $company->PostalCode }}</td>
-                                <td>{{ $company->HomeCountry }}</td>
-                                <td>{{ $company->MainCountryOfOrigin }}</td>
-                                <td>{{ $company->contacts_count }}</td>
-                                <td>{{ $company->Active ? 'Yes':'No' }}</td>
-                                <td>{{ $company->Deleted ? 'Yes':'No' }}</td>
-                                <td>{{ $company->Archived ? 'Yes':'No' }}</td>
-                                <td>
-                                    <a href="/companies/{{$company->PRI}}" type="button" class="btn btn-info btn-sm">View</a>
-                                    <a href="/companies/{{$company->PRI}}/edit" type="button"
-                                       class="btn btn-info btn-sm">Edit</a>
-                                    <form action="/companies/{{$company->PRI}}" method="post">
-                                        @method('DELETE')
-                                        @csrf
-                                        <button href="/companies/{{$company->PRI}}"
-                                                type="submit"
-                                                class="btn btn-danger btn-sm">Delete
-                                        </button>
-                                    </form>
+            <div class="col-md-8">
+                @if($company)
 
-                                </td>
-                            </tr>
-                        @endforeach
-                        </tbody>
-                    </table>
+                    <form method="post" action="/companies/{{$company->PRI}}">
+                        @csrf
+                        @method('PATCH')
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="companyname">Company Name</label>
+                                <input type="text" name="CompanyName" class="form-control" id="companyname"
+                                       value="{{$company->CompanyName}}">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="ticker">Ticker</label>
+                                <input type="text" name="Ticker" class="form-control" id="ticker"
+                                       value="{{$company->Ticker}}">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="nickname">NickName</label>
+                            <input type="text" class="form-control" id="nickname" name="NickName"
+                                   value="{{$company->NickName}}">
+                        </div>
+                        <div class="form-group">
+                            <label for="inputAddress">Address</label>
+                            <input type="text" class="form-control" name="Address_1" id="inputAddress"
+                                   value="{{$company->Address_1}}"
+                                   placeholder="1234 Main St">
+                        </div>
+                        <div class="form-group">
+                            <label for="inputAddress2">Address 2</label>
+                            <input type="text" class="form-control" name="Address_2" id="inputAddress2"
+                                   value="{{$company->Address_2}}"
+                                   placeholder="Apartment, studio, or floor">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="inputCity">City</label>
+                                <input type="text" name="City" class="form-control" id="inputCity"
+                                       value="{{$company->City}}">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="inputState">State</label>
+                                <input type="text" name="State" class="form-control" id="inputState"
+                                       value="{{$company->State}}">
+                            </div>
+
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-2">
+                                <label for="inputZip">Postal Code</label>
+                                <input type="text" name="PostalCode" class="form-control" id="inputZip"
+                                       value="{{$company->PostalCode}}">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="inputZip">Home Country</label>
+                                <input type="text" name="PostalCode" class="form-control" id="inputZip"
+                                       value="{{$company->Country}}">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="inputZip">Main Country Of Origin</label>
+                                <input type="text" name="MainCountryOfOrigin" class="form-control" id="inputZip"
+                                       value="{{$company->MainCountryOfOrigin}}">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-check mb-4">
+                                <input class="form-check-input" name="Active" type="checkbox"
+                                       id="companyactive" {{  ($company->Active ? ' checked' : '') }}>
+                                <label class="form-check-label" for="companyactive">
+                                    Active
+                                </label>
+                            </div>
+                            <div class="form-check mb-4">
+                                <input class="form-check-input" name="Deleted" type="checkbox"
+                                       id="companydeleted" {{  ($company->Deleted ? ' checked' : '') }}>
+                                <label class="form-check-label" for="companydeleted">
+                                    Deleted
+                                </label>
+                            </div>
+                            <div class="form-check mb-4">
+                                <input class="form-check-input" name="Archived" type="checkbox"
+                                       id="companyarchived" {{  ($company->Archived ? ' checked' : '') }}>
+                                <label class="form-check-label" for="companyarchived">
+                                    Archived
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Update</button>
+                        <a href="/contacts/"></a>
+                    </form>
                 @else
                     @if(Auth::user())
                         <h2>You do not have any companies. Please <a href="/companies/create">Click here</a> to create

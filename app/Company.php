@@ -13,9 +13,9 @@
         CONST CREATED_AT = null;
 
 
-        public function users()
+        public function owner()
         {
-            return $this->belongsToMany( User::class, 'tbldat_UserCompanies' );
+            return $this->belongsTo( User::class );
         }
 
         public function contacts()
