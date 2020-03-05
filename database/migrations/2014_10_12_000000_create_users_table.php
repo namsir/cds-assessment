@@ -26,7 +26,6 @@ class CreateUsersTable extends Migration
 
         Schema::create('tbldat_Companies', function (Blueprint $table) {
             $table->bigIncrements('PRI');
-            $table->unsignedBigInteger('User_Key')->index();
             $table->string('CompanyName', 255);
             $table->string('Ticker', 50)->nullable();
             $table->string('NickName', 255)->nullable();
@@ -40,7 +39,6 @@ class CreateUsersTable extends Migration
             $table->tinyInteger('Active')->nullable();
             $table->tinyInteger('Deleted')->nullable();
             $table->tinyInteger('Archived')->nullable();
-            $table->foreign('User_Key')->references('PRI')->on('tbldat_Users')->onDelete('CASCADE');
         });
 
 
@@ -76,6 +74,14 @@ class CreateUsersTable extends Migration
 
         });
 
+
+        Schema::create('tbldat_UserCompanies', function (Blueprint $table){
+            $table->unsignedBigInteger('User_Key')->index();
+            $table->foreign('User_Key')->references('PRI')->on('tbldat_Users')->onDelete('CASCADE');
+            $table->unsignedBigInteger('Company_Key')->index();
+            $table->foreign('Company_Key')->references('PRI')->on('tbldat_Companies')->onDelete('CASCADE');
+            $table->timestamps();
+        });
 
     }
 
