@@ -90,8 +90,11 @@
                 $table->unsignedBigInteger( 'User_Key' );
                 $table->string( 'Action' );
                 $table->string( 'Subject' );
+                $table->morphs('loggable');
                 $table->timestamps();
             } );
+
+
         }
 
         /**
