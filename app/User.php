@@ -46,6 +46,10 @@
 
 
         public function company(){
-            return $this->hasOne(Company::class);
+            return $this->hasOne(Company::class, 'User_Key', 'PRI');
+        }
+
+        public function logs(){
+            return $this->hasMany(Log::class,'User_Key', 'PRI');
         }
     }

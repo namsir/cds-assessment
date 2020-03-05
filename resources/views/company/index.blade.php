@@ -9,7 +9,7 @@
             <div class="col-md-8">
                 @if($company)
 
-                    <form method="post" action="/companies/{{$company->PRI}}">
+                    <form method="post" action="/company/{{$company->PRI}}">
                         @csrf
                         @method('PATCH')
                         <div class="form-row">
@@ -97,14 +97,15 @@
                         </div>
 
                         <button type="submit" class="btn btn-primary">Update</button>
-                        <a href="/contacts/"></a>
                     </form>
+
+
                 @else
                     @if(Auth::user())
-                        <h2>You do not have any companies. Please <a href="/companies/create">Click here</a> to create
+                        <h2>You do not have a company. Please <a href="/company/create">Click here</a> to create
                             one.</h2>
                     @else
-                        <h2>You do not have any companies. Please <a href="/login">login</a> to create one.</h2>
+                        <h2>You do not have a company. Please <a href="/login">login</a> to create one.</h2>
                     @endif
                 @endif
             </div>
