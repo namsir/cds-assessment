@@ -16,8 +16,14 @@
          */
         protected $guarded = [];
 
-        public function user()
+        public function loggable()
         {
-            return $this->belongsTo( User::class, 'User_Key', 'PRI' );
+            return $this->morphTo();
+        }
+
+
+
+        public function user(){
+            return $this->belongsTo(User::class, 'User_Key', 'PRI');
         }
     }

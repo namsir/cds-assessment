@@ -40,12 +40,10 @@
         {
             $user = Auth::user();
 
-            if ( ! $user ) {
-                return view( 'company.index', compact( 'companies' ) );
-            }
-            $company = $user->company()->with( [ 'contacts' ] )->first();
 
-            return view( 'company.index', compact( 'company' ) );
+            $companies = $user->companies()->with('owner')->withCount( [ 'contacts' ] )->get();
+
+            return view( 'company.index', compact( 'companies' ) );
         }
 
         /**
@@ -67,17 +65,17 @@
          */
         public function store( Request $request )
         {
-            $user      = Auth::user();
-            $validated = $this->validator( $request );
+            $user                  = Auth::user();
+            $validated             = $this->validator( $request );
+            $validated[ 'Active' ] = 1;
+            $company               = $user->companies()->create( $validated );
 
-            $company = $user->company()->create( $validated );
+            $log         = new Log();
+            $log->Action = 'CREATE';
 
-            $user->logs()->create( [
-                                       'Action'  => 'CREATE',
-                                       'Subject' => 'COMPANY ' . $company->CompanyName,
-                                   ] );
+            $this->createLog( $company, 'CREATE' );
 
-            return view( 'company.index', compact( 'company' ) );
+            return redirect( '/companies' );
         }
 
         /**
@@ -89,7 +87,12 @@
          */
         public function show( Request $request, Company $company )
         {
-            return view( 'company.show', compact( 'company' ) );
+            if ( $company->User_Key !== $request->user()->PRI ) {
+                abort( 404, 'Company not found' );
+            }
+            $contacts = $company->contacts;
+
+            return view( 'company.show', compact( 'company', 'contacts' ) );
         }
 
         /**
@@ -122,18 +125,20 @@
             $validated[ 'Deleted' ]  = $request->has( 'Deleted' );
             $validated[ 'Archived' ] = $request->has( 'Archived' );
 
+            if ( $company->User_Key !== $request->user()->PRI ) {
+                abort( 404, 'Company not found' );
+            }
+
             if ( $validated[ 'Deleted' ] ) {
                 $validated[ 'Active' ]   = 0;
                 $validated[ 'Archived' ] = 0;
             }
+
             $company->update( $validated );
 
-            Auth()->user()->logs()->create( [
-                                                'Action'  => 'UPDATE',
-                                                'Subject' => 'COMPANY ' . $company->CompanyName,
-                                            ] );
+            $this->createLog( $company, 'UPDATE' );
 
-            return redirect( '/company' );
+            return redirect( '/companies' );
         }
 
         /**
@@ -146,13 +151,53 @@
          */
         public function destroy( Request $request, Company $company )
         {
-            $company->Deleted = 1;
+            if ( $company->User_Key !== $request->user()->PRI ) {
+                abort( 404, 'Company not found' );
+            }
+            $company->Deleted  = 1;
+            $company->Active   = 0;
+            $company->Archived = 0;
             $company->save();
-            Auth()->user()->logs()->create( [
-                                                'Action'  => 'DELETE',
-                                                'Subject' => 'COMPANY ' . $company->CompanyName,
-                                            ] );
+            $this->createLog( $company, 'DELETE' );
 
             return redirect( '/companies' );
+        }
+
+        public function archive( Request $request, Company $company )
+        {
+            if ( $company->User_Key !== $request->user()->PRI ) {
+                abort( 404, 'Company not found' );
+            }
+            $company->Deleted  = 0;
+            $company->Active   = 0;
+            $company->Archived = 1;
+            $company->save();
+            $this->createLog( $company, 'ARCHIVE' );
+
+            return redirect( '/companies' );
+        }
+
+        public function active( Request $request, Company $company )
+        {
+            if ( $company->User_Key !== $request->user()->PRI ) {
+                abort( 404, 'Company not found' );
+            }
+            $company->Deleted  = 0;
+            $company->Active   = 1;
+            $company->Archived = 0;
+            $company->save();
+            $this->createLog( $company, 'ACTIVE' );
+
+            return redirect( '/companies' );
+        }
+
+
+        public function createLog( $company, $action )
+        {
+            $log = new Log( [
+                                'Action'   => $action,
+                                'User_Key' => Auth::user()->PRI,
+                            ] );
+            $company->logs()->save( $log );
         }
     }

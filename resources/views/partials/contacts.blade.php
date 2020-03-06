@@ -1,7 +1,7 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col">
-            <a href="/contacts/create" class="btn btn-primary">Create a contact</a>
+            <a href="/companies/{{$company->PRI}}/contacts/create" class="btn btn-primary">Create a contact</a>
         </div>
     </div>
 </div>
@@ -46,12 +46,22 @@
                         <p class="card-text {{ $contact->Deleted ? 'alert-danger':'' }}">Deleted: {{ $contact->Deleted ? 'Yes':'No' }}</p>
                         <p class="card-text">Archived: {{ $contact->Archived ? 'Yes':'No' }}</p>
 
-                        <a href="/contacts/{{$contact->PRI}}/edit" class="btn btn-primary">Edit</a>
+                        <a href="/companies/{{$company->PRI}}/contacts/{{$contact->PRI}}/edit" class="btn btn-primary">Edit</a>
 
-                        <form action="/contacts/{{$contact->PRI}}" method="POST">
+                        <form action="/companies/{{$company->PRI}}/contacts/{{$contact->PRI}}/active" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-info">Active</button>
+                        </form>
+
+                        <form action="/companies/{{$company->PRI}}/contacts/{{$contact->PRI}}" method="POST">
                             @method('delete')
                             @csrf
                             <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+
+                        <form class="d-inline" action="/companies/{{$company->PRI}}/contacts/{{$contact->PRI}}/archive" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-secondary">Archive</button>
                         </form>
                     </div>
                 </div>

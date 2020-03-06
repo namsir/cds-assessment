@@ -33,6 +33,8 @@
                 'Phone_Mobile'  => [ 'sometimes', 'nullable', 'string', 'max:10' ],
                 'Phone_Land'    => [ 'sometimes', 'nullable', 'string', 'max:10' ],
                 'Phone_Fax'     => [ 'sometimes', 'nullable', 'string', 'max:10' ],
+                'TwitterHandle' => [ 'sometimes', 'nullable', 'string', 'max:255' ],
+                'FacebookName'  => [ 'sometimes', 'nullable', 'string', 'max:255' ],
 
             ] );
         }
@@ -40,15 +42,21 @@
         /**
          * Display a listing of the resource.
          *
+         * @param Request $request
+         * @param Company $company
+         *
          * @return \Illuminate\Http\Response
          */
-        public function index()
+        public function index( Request $request, Company $company )
         {
-            $user     = Auth::user();
-            $company  = $user->company;
-            $contacts = $company->with( 'contacts' )->get();
+            $user = Auth::user();
+            if ( $user->PRI === $company->User_Key ) {
+                $contacts = $company->contacts()->get();
 
-            return view( 'contact.index', compact( 'contacts', 'company' ) );
+                return view( 'contact.index', compact( 'contacts', 'company' ) );
+            }
+
+            abort( 404, 'Company not found' );
         }
 
         /**
@@ -59,11 +67,12 @@
          *
          * @return void
          */
-        public function create()
+        public function create( Request $request, Company $company )
         {
-            $company = Auth::user()->company;
-
-            return view( 'contact.create', compact( 'company' ) );
+            if ( Auth::user()->PRI === $company->User_Key ) {
+                return view( 'contact.create', compact( 'company' ) );
+            }
+            abort( 404, 'Invalid Company' );
         }
 
         /**
@@ -73,21 +82,19 @@
          *
          * @return \Illuminate\Http\Response
          */
-        public function store( Request $request )
+        public function store( Request $request, Company $company )
         {
             $user = Auth::user();
-            if ( ! $user->company ) {
+            if ( $user->PRI !== $company->User_Key ) {
                 abort( 404, 'Please create a company before submit a contact!' );
             }
 
-            $validated = $this->validator( $request );
-            $contact   = $user->company->contacts()->create( $validated );
-            $user->logs()->create( [
-                                       'Action'  => 'CREATE',
-                                       'Subject' => 'CONTACT ' . $contact->FName . ' ' . $contact->LName,
-                                   ] );
+            $validated             = $this->validator( $request );
+            $validated[ 'Active' ] = 1;
+            $contact               = $company->contacts()->create( $validated );
+            $this->createLog( $contact, 'CREATE' );
 
-            return redirect( '/contacts' );
+            return redirect( '/companies/' . $company->PRI . '/contacts' );
         }
 
         /**
@@ -105,70 +112,126 @@
         /**
          * Show the form for editing the specified resource.
          *
+         * @param Request $request
+         * @param Company $company
          * @param Contact $contact
          *
          * @return \Illuminate\Http\Response
          */
-        public function edit( Contact $contact )
+        public function edit( Request $request, Company $company, Contact $contact )
         {
-            return view( 'contact.edit', compact( 'contact' ) );
+            return view( 'contact.edit', compact( 'contact', 'company' ) );
         }
 
         /**
          * Update the specified resource in storage.
          *
          * @param \Illuminate\Http\Request $request
+         * @param Company $company
          * @param Contact $contact
          *
          * @return void
          */
-        public function update( Request $request, Contact $contact )
+        public function update( Request $request, Company $company, Contact $contact )
         {
-            $user    = Auth::user();
-            $company = $user->company;
+            $user = Auth::user();
 
-            if ( $company->contacts()->exists() ) {
-
-                $validated = $this->validator( $request );
-
-                $contact->update( $validated );
-
-                $user->logs()->create( [
-                                           'Action'  => 'UPDATE',
-                                           'Subject' => 'CONTACT ' . $contact->FName . ' ' . $contact->LName,
-                                       ] );
-
-                return redirect( '/contacts' );
+            if ( $user->PRI !== $company->User_Key ) {
+                abort( 404, 'Invalid Company' );
+            }
+            if ( $contact->Company_Key !== $company->PRI ) {
+                abort( 404, 'Contact not found' );
             }
 
-            abort( 404, 'This contact does not belong to you! Abort!' );
+            $validated = $this->validator( $request );
+
+            $contact->update( $validated );
+
+            $this->createLog( $contact, 'UPDATE' );
+
+            return redirect( '/companies/' . $company->PRI . '/contacts' );
+
+
+        }
+
+
+        public function createLog( $contact, $action )
+        {
+            $log = new Log( [
+                                'Action'   => $action,
+                                'User_Key' => Auth::user()->PRI,
+                            ] );
+            $contact->logs()->save( $log );
         }
 
         /**
          * Remove the specified resource from storage.
          *
+         * @param Company $company
          * @param Contact $contact
          *
          * @return void
          */
-        public function destroy( Contact $contact )
+        public function destroy( Company $company, Contact $contact )
         {
-            $user    = Auth::user();
-            $company = $user->company;
-
-            if ( $company->contacts()->exists() ) {
-                $contact->Deleted = 1;
-                $contact->save();
-
-                $user->logs()->create( [
-                                           'Action'  => 'DELETE',
-                                           'Subject' => 'CONTACT ' . $contact->FName . ' ' . $contact->LName,
-                                       ] );
-
-                return redirect( '/contacts' );
+            $user = Auth::user();
+            if ( $user->PRI !== $company->User_Key ) {
+                abort( 404, 'Invalid Company' );
+            }
+            if ( $contact->Company_Key !== $company->PRI ) {
+                abort( 404, 'Contact not found' );
             }
 
-            abort( 404, 'This contact does not belong to you! Abort!' );
+            $contact->Deleted  = 1;
+            $contact->Active   = 0;
+            $contact->Archived = 0;
+            $contact->save();
+
+            $this->createLog( $contact, 'DELETE' );
+
+            return redirect( '/companies/' . $company->PRI . '/contacts' );
+
+        }
+
+        public function archive( Company $company, Contact $contact )
+        {
+            $user = Auth::user();
+            if ( $user->PRI !== $company->User_Key ) {
+                abort( 404, 'Invalid Company' );
+            }
+            if ( $contact->Company_Key !== $company->PRI ) {
+                abort( 404, 'Contact not found' );
+            }
+
+            $contact->Deleted  = 0;
+            $contact->Active   = 0;
+            $contact->Archived = 1;
+            $contact->save();
+
+            $this->createLog( $contact, 'ARCHIVE' );
+
+            return redirect( '/companies/' . $company->PRI . '/contacts' );
+
+        }
+
+        public function active( Company $company, Contact $contact )
+        {
+            $user = Auth::user();
+            if ( $user->PRI !== $company->User_Key ) {
+                abort( 404, 'Invalid Company' );
+            }
+            if ( $contact->Company_Key !== $company->PRI ) {
+                abort( 404, 'Contact not found' );
+            }
+
+            $contact->Deleted  = 0;
+            $contact->Active   = 1;
+            $contact->Archived = 0;
+            $contact->save();
+
+            $this->createLog( $contact, 'ACTIVE' );
+
+            return redirect( '/companies/' . $company->PRI . '/contacts' );
 
         }
     }

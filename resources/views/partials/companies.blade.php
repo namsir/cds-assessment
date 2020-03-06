@@ -1,8 +1,15 @@
-@extends('layouts.app')
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col">
+            <a href="/companies/create" class="btn btn-primary">Create a company</a>
+        </div>
+    </div>
+</div>
+<div class="container mt-5">
+    <div class="row justify-content-center">
 
-@section('content')
-    <div class="container mt-5">
-        <div class="row justify-content-center">
+        @foreach($companies as $company)
+
             <div class="col">
                 <div class="card">
                     <div class="card-header">
@@ -22,20 +29,27 @@
                         <p class="card-text">Contacts: {{ $company->contacts_count }}</p>
 
                         <p class="card-text">Active: {{ $company->Active ? 'Yes':'No' }}</p>
-                        <p class="card-text {{ $company->Deleted ? 'alert-danger':'' }}">
-                            Deleted: {{ $company->Deleted ? 'Yes':'No' }}</p>
+                        <p class="card-text {{ $company->Deleted ? 'alert-danger':'' }}">Deleted: {{ $company->Deleted ? 'Yes':'No' }}</p>
                         <p class="card-text">Archived: {{ $company->Archived ? 'Yes':'No' }}</p>
 
                         <a href="/companies/{{$company->PRI}}/contacts" class="btn btn-primary">View Contacts</a>
                         <a href="/contacts/{{$company->PRI}}/edit" class="btn btn-primary">Edit</a>
-                        <form class="d-inline" action="/contacts/{{$company->PRI}}" method="POST">
+                        <form action="/companies/{{$company->PRI}}/active" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-info">Active</button>
+                        </form>
+                        <form action="/companies/{{$company->PRI}}" method="POST">
                             @method('delete')
                             @csrf
                             <button type="submit" class="btn btn-danger">Delete</button>
                         </form>
+                        <form class="d-inline" action="/companies/{{$company->PRI}}/archive" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-secondary">Archive</button>
+                        </form>
                     </div>
                 </div>
             </div>
-        </div>
+        @endforeach
     </div>
-@endsection
+</div>

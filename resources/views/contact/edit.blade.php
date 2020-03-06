@@ -4,7 +4,7 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <form method="POST" action="/contacts/{{$contact->PRI}}">
+                <form method="POST" action="/companies/{{$company->PRI}}/contacts/{{$contact->PRI}}">
                     @method('PUT')
                     @csrf
                     <div class="form-row">

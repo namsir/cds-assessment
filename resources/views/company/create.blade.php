@@ -5,7 +5,7 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <form method="POST" action="/company">
+            <form method="POST" action="/companies">
                 @csrf
                 <div class="form-row">
                     <div class="form-group col-md-6">

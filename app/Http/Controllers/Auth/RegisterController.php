@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Log;
 use App\Providers\RouteServiceProvider;
 use App\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
@@ -69,10 +70,12 @@ class RegisterController extends Controller
                                  'email' => $data['email'],
                                  'password' => Hash::make($data['password']),
                              ]);
-        $user->logs()->create( [
-                                   'Action'  => 'CREATE',
-                                   'Subject' => 'User ' . $user->email,
-                               ] );
+
+
+        $log = new Log();
+        $log->Action = 'CREATE';
+
+        $user->logs()->create(['User_Key' => $user->PRI, 'loggable_type' => User::class, 'loggable_id' => $user->PRI, 'Action' => 'REGISTRATION']);
         return $user;
     }
 }

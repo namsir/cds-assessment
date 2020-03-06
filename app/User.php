@@ -45,11 +45,11 @@
 
 
 
-        public function company(){
-            return $this->hasOne(Company::class, 'User_Key', 'PRI');
+        public function companies(){
+            return $this->hasMany(Company::class, 'User_Key', 'PRI');
         }
 
         public function logs(){
-            return $this->hasMany(Log::class,'User_Key', 'PRI');
+            return $this->hasMany(Log::class, 'User_Key', 'PRI');
         }
     }

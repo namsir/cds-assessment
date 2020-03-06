@@ -36,11 +36,9 @@
                 <!-- Left Side Of Navbar -->
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/company">{{ __('Company') }}</a>
+                        <a class="nav-link" href="/companies">{{ __('Companies') }}</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/contacts">{{ __('Contacts') }}</a>
-                    </li>
+
                     <li class="nav-item">
                         <a class="nav-link" href="/logs">{{ __('Logs') }}</a>
                     </li>

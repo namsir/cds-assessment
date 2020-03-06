@@ -16,4 +16,8 @@
         {
             return $this->belongsTo( Company::class, 'Company_Key' );
         }
+
+        public function logs(){
+            return $this->morphMany(Log::class, 'loggable');
+        }
     }

@@ -37,6 +37,8 @@
                 $table->string( 'PostalCode', 10 )->nullable();
                 $table->string( 'HomeCountry', 255 )->nullable();
                 $table->string( 'MainCountryOfOrigin', 255 )->nullable();
+                $table->unsignedBigInteger('User_Key')->index();
+                $table->foreign('User_Key')->references('PRI')->on('tbldat_Users')->onDelete('cascade')->onUpdate('cascade');
                 $table->tinyInteger( 'Active' )->nullable();
                 $table->tinyInteger( 'Deleted' )->nullable();
                 $table->tinyInteger( 'Archived' )->nullable();
@@ -76,20 +78,14 @@
             } );
 
 
-            Schema::create( 'tbldat_UserCompanies', function ( Blueprint $table ) {
-                $table->unsignedBigInteger( 'User_Key' )->index();
-                $table->foreign( 'User_Key' )->references( 'PRI' )->on( 'tbldat_Users' )->onDelete( 'CASCADE' );
-                $table->unsignedBigInteger( 'Company_Key' )->index();
-                $table->foreign( 'Company_Key' )->references( 'PRI' )->on( 'tbldat_Companies' )->onDelete( 'CASCADE' );
-                $table->timestamps();
-            } );
+
 
 
             Schema::create( 'tbldat_Logs', function ( Blueprint $table ) {
                 $table->bigIncrements( 'PRI' );
-                $table->unsignedBigInteger( 'User_Key' );
+                $table->unsignedBigInteger('User_Key')->index();
+                $table->foreign('User_Key')->references('PRI')->on('tbldat_Users')->onDelete('cascade');
                 $table->string( 'Action' );
-                $table->string( 'Subject' );
                 $table->morphs('loggable');
                 $table->timestamps();
             } );

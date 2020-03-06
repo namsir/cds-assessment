@@ -4,6 +4,7 @@
     <div class="container">
         <div class="row">
             <div class="col">
+                <a href="/logs" class="btn btn-primary">Back to all</a>
                 <table class="table table-hover">
                     <thead>
                     <tr>
@@ -22,7 +23,7 @@
                             <th scope="row">{{$log->PRI}}</th>
                             <td>{{$log->user->email}}</td>
                             <td>{{$log->Action}}</td>
-                            <td>{{$log->Subject}}</td>
+                            <td>{{$log->loggable_type}}</td>
                             <td>{{$log->updated_at->diffForHumans()}}</td>
                         </tr>
 
@@ -30,6 +31,7 @@
 
                     </tbody>
                 </table>
+                {{ $logs->links() }}
             </div>
         </div>
     </div>

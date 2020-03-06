@@ -14,7 +14,7 @@
                         </div>
                     @endif
 
-                    You are logged in! <a href="/company">Click here</a> to view/update your company.
+                    You are logged in! <a href="/companies">Click here</a> to view/update your companies.
                 </div>
             </div>
         </div>

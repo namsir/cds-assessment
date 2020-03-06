@@ -23,6 +23,8 @@
             return $this->hasMany( Contact::class, 'Company_Key', 'PRI' );
         }
 
-
+        public function logs(){
+            return $this->morphMany(Log::class, 'loggable');
+        }
 
     }
